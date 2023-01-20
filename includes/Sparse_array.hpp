@@ -8,6 +8,7 @@
 #ifndef SPARSE_ARRAY_HPP_
 #define SPARSE_ARRAY_HPP_
 
+#include <utility>
 #include <optional>
 #include <vector>
 
@@ -23,15 +24,13 @@ public:
 
 public:
     sparse_array() = default;
-    sparse_array(sparse_array const &) = default;     // copy constructor
-    sparse_array(sparse_array &&) noexcept = default; // move constructor
+    sparse_array(sparse_array const &) = default;
+    sparse_array(sparse_array &&) noexcept = default;
 
     ~sparse_array() = default;
 
-    sparse_array &operator=(
-        sparse_array const &) = default; // copy assignment operator
-    sparse_array &operator=(
-        sparse_array &&) noexcept = default; // move assignment operator
+    sparse_array &operator=(sparse_array const &) = default;
+    sparse_array &operator=(sparse_array &&) noexcept = default;
 
     // vector functions overload
     reference_type operator[](size_t idx)
