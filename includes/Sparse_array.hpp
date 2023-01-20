@@ -9,10 +9,10 @@
 #define SPARSE_ARRAY_HPP_
 
 #include <optional>
+#include <utility>
 #include <vector>
 
-template <typename Component>
-class sparse_array {
+template <typename Component> class sparse_array {
 public:
     using value_type = std::optional<Component>;
     using reference_type = value_type &;
@@ -24,47 +24,77 @@ public:
 
 public:
     sparse_array() = default;
-    sparse_array(sparse_array const &) = default;     // copy constructor
-    sparse_array(sparse_array &&) noexcept = default; // move constructor
+    sparse_array(sparse_array const &) = default;
+    sparse_array(sparse_array &&) noexcept = default;
 
     ~sparse_array() = default;
 
-    sparse_array &operator=(sparse_array const &) = default; // copy assignment operator
-    sparse_array &operator=(sparse_array &&) noexcept = default; // move assignment operator
+    sparse_array &operator=(sparse_array const &) = default;
+    sparse_array &operator=(sparse_array &&) noexcept = default;
 
     // vector functions overload
-    reference_type operator[](size_t idx) { return _data[idx]; }
-    const_reference_type operator[](size_t idx) const { return _data[idx]; };
-    iterator begin() { return _data.begin(); };
-    const_iterator begin() const { return _data.begin(); };
-    const_iterator cbegin() const  { return _data.cbegin(); };
-    iterator end() { return _data.end(); };
-    const_iterator end() const { return _data.end(); };
-    const_iterator cend() const { return _data.cend(); };
-    size_type size() const { return _data.size(); };
+    reference_type operator[](size_t idx)
+    {
+        return _data[idx];
+    }
+    const_reference_type operator[](size_t idx) const
+    {
+        return _data[idx];
+    };
+    iterator begin()
+    {
+        return _data.begin();
+    };
+    const_iterator begin() const
+    {
+        return _data.begin();
+    };
+    const_iterator cbegin() const
+    {
+        return _data.cbegin();
+    };
+    iterator end()
+    {
+        return _data.end();
+    };
+    const_iterator end() const
+    {
+        return _data.end();
+    };
+    const_iterator cend() const
+    {
+        return _data.cend();
+    };
+    size_type size() const
+    {
+        return _data.size();
+    };
 
-    reference_type insert_at(size_type pos, Component const &component) {
+    reference_type insert_at(size_type pos, Component const &component)
+    {
         if (pos >= _data.size()) {
             _data.resize(pos + 1);
         }
         _data[pos] = component;
         return _data[pos];
     }
-    reference_type insert_at(size_type pos, Component &&component) {
+    reference_type insert_at(size_type pos, Component &&component)
+    {
         if (pos >= _data.size()) {
             _data.resize(pos + 1);
         }
         _data[pos] = std::move(component);
         return _data[pos];
     }
-    template <class... Params>
-    void erase(size_type pos) {
+    template <class... Params> void erase(size_type pos)
+    {
         if (pos >= _data.size()) {
             return;
         }
         _data[pos].reset();
     }
-    size_type get_index(value_type const &value) const {
+    size_type get_index(value_type const &value) const
+    {
         if (!value.has_value())
             return -1;
 
