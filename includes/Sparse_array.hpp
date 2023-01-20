@@ -8,12 +8,13 @@
 #ifndef SPARSE_ARRAY_HPP_
 #define SPARSE_ARRAY_HPP_
 
-#include <utility>
 #include <optional>
+#include <utility>
 #include <vector>
 
-template <typename Component> class sparse_array {
-public:
+template <typename Component> class sparse_array
+{
+  public:
     using value_type = std::optional<Component>;
     using reference_type = value_type &;
     using const_reference_type = value_type const &;
@@ -22,7 +23,7 @@ public:
     using iterator = typename container_t::iterator;
     using const_iterator = typename container_t::const_iterator;
 
-public:
+  public:
     sparse_array() = default;
     sparse_array(sparse_array const &) = default;
     sparse_array(sparse_array &&) noexcept = default;
@@ -72,7 +73,8 @@ public:
 
     reference_type insert_at(size_type pos, Component const &component)
     {
-        if (pos >= _data.size()) {
+        if (pos >= _data.size())
+        {
             _data.resize(pos + 1);
         }
         _data[pos] = component;
@@ -80,7 +82,8 @@ public:
     }
     reference_type insert_at(size_type pos, Component &&component)
     {
-        if (pos >= _data.size()) {
+        if (pos >= _data.size())
+        {
             _data.resize(pos + 1);
         }
         _data[pos] = std::move(component);
@@ -88,7 +91,8 @@ public:
     }
     template <class... Params> void erase(size_type pos)
     {
-        if (pos >= _data.size()) {
+        if (pos >= _data.size())
+        {
             return;
         }
         _data[pos].reset();
@@ -100,15 +104,17 @@ public:
 
         auto addrval = std::addressof(value.value());
 
-        for (auto it = _data.begin(); it != _data.end(); ++it) {
-            if (it->has_value() && std::addressof(it->value()) == addrval) {
+        for (auto it = _data.begin(); it != _data.end(); ++it)
+        {
+            if (it->has_value() && std::addressof(it->value()) == addrval)
+            {
                 return std::distance(_data.begin(), it);
             }
         }
         return -1;
     }
 
-private:
+  private:
     container_t _data;
 };
 
