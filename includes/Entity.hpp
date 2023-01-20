@@ -11,8 +11,9 @@
 #include <string>
 
 class entity {
-public:
+    friend class registry;
     explicit entity(size_t number) : _number(number) {}
+public:
     operator size_t() const { return _number; }
 
 private:
