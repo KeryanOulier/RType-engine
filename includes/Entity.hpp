@@ -12,9 +12,16 @@
 
 class entity {
     friend class registry;
-    explicit entity(size_t number) : _number(number) {}
+    explicit entity(size_t number)
+        : _number(number)
+    {
+    }
+
 public:
-    operator size_t() const { return _number; }
+    operator size_t() const
+    {
+        return _number;
+    }
 
 private:
     size_t _number;
