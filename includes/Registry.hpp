@@ -65,6 +65,10 @@ public:
     {
         get_components<Component>().erase(from);
     }
+    int get_max_entity_count() const
+    {
+        return _higgest_entity_id;
+    }
 
 private:
     std::unordered_map<std::type_index, std::any> _components_array;
