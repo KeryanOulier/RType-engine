@@ -24,53 +24,134 @@ namespace ecs {
         using const_iterator = typename container_t::const_iterator;
 
     public:
+        /**
+         * @brief Construct a new sparse array object
+         * 
+         */
         sparse_array() = default;
-        sparse_array(sparse_array const &) = default;
-        sparse_array(sparse_array &&) noexcept = default;
-
+        /**
+         * @brief Copy construct a new sparse array object
+         * 
+         * @param from sparse_array to copy
+         */
+        sparse_array(sparse_array const &from) = default;
+        /**
+         * @brief Move construct a new sparse array object
+         * 
+         * @param from sparse_array to move
+         */
+        sparse_array(sparse_array &&from) noexcept = default;
+        
+        /**
+         * @brief Destroy the sparse array object
+         * 
+         */
         ~sparse_array() = default;
 
-        sparse_array &operator=(sparse_array const &) = default;
-        sparse_array &operator=(sparse_array &&) noexcept = default;
+        /**
+         * @brief Copy assign a new sparse array object
+         * 
+         * @param from sparse_array to copy
+         */
+        sparse_array &operator=(sparse_array const &from) = default;
+        /**
+         * @brief Move assign a new sparse array object
+         * 
+         * @param from sparse_array to move
+         */
+        sparse_array &operator=(sparse_array &&from) noexcept = default;
 
         // vector functions overload
+        /**
+         * @brief Overload of operator[] to access the sparse_array at a given index
+         * 
+         * @param idx to access
+         * @return reference_type 
+         */
         reference_type operator[](size_t idx)
         {
             return _data[idx];
         }
+        /**
+         * @brief Overload of operator[] to access the sparse_array at a given index (const)
+         * 
+         * @param idx to access
+         * @return const_reference_type 
+         */
         const_reference_type operator[](size_t idx) const
         {
             return _data[idx];
         };
+        /**
+         * @brief Overlaod of begin() to access the begin of the sparse_array
+         * 
+         * @return iterator 
+         */
         iterator begin()
         {
             return _data.begin();
         };
+        /**
+         * @brief Overlaod of begin() to access the begin of the sparse_array (const)
+         * 
+         * @return const_iterator 
+         */
         const_iterator begin() const
         {
             return _data.begin();
         };
+        /**
+         * @brief Overlaod of cbegin() to access the begin of the sparse_array (const)
+         * 
+         * @return const_iterator 
+         */
         const_iterator cbegin() const
         {
             return _data.cbegin();
         };
+        /**
+         * @brief Overlaod of end() to access the end of the sparse_array
+         * 
+         * @return iterator 
+         */
         iterator end()
         {
             return _data.end();
         };
+        /**
+         * @brief Overlaod of end() to access the end of the sparse_array (const)
+         * 
+         * @return const_iterator 
+         */
         const_iterator end() const
         {
             return _data.end();
         };
+        /**
+         * @brief Overlaod of cend() to access the end of the sparse_array (const)
+         * 
+         * @return const_iterator 
+         */
         const_iterator cend() const
         {
             return _data.cend();
         };
+        /**
+         * @brief Overlaod of size() to access the size of the sparse_array
+         * 
+         * @return size_type 
+         */
         size_type size() const
         {
             return _data.size();
         };
-
+        /**
+         * @brief Insert a component at a given position in the sparse_array. If the position is out of range, the sparse_array will be resized.
+         * 
+         * @param pos to instert to
+         * @param component component to insert
+         * @return reference_type 
+         */
         reference_type insert_at(size_type pos, Component const &component)
         {
             if (pos >= _data.size()) {
@@ -79,6 +160,13 @@ namespace ecs {
             _data[pos] = component;
             return _data[pos];
         }
+        /**
+         * @brief Insert a component at a given position in the sparse_array. If the position is out of range, the sparse_array will be resized. Like the previous one, but move the component instead of copying it.
+         * 
+         * @param pos to instert to
+         * @param component component to insert
+         * @return reference_type 
+         */
         reference_type insert_at(size_type pos, Component &&component)
         {
             if (pos >= _data.size()) {
@@ -87,6 +175,12 @@ namespace ecs {
             _data[pos] = std::move(component);
             return _data[pos];
         }
+        /**
+         * @brief Remove a component at a given position in the sparse_array. Does not resize the sparse_array, it only replace the component by nothing. If the position is out of range, nothing will happen.
+         * 
+         * @tparam Params 
+         * @param pos of the component to remove
+         */
         template <class... Params> void erase(size_type pos)
         {
             if (pos >= _data.size()) {
@@ -94,6 +188,12 @@ namespace ecs {
             }
             _data[pos].reset();
         }
+        /**
+         * @brief Get the index of a component in the sparse_array. If the component is not in the sparse_array, -1 will be returned.
+         * 
+         * @param value component to get the index of
+         * @return size_type 
+         */
         size_type get_index(value_type const &value) const
         {
             if (!value.has_value())
