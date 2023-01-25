@@ -10,21 +10,23 @@
 
 #include <string>
 
-class entity {
-    friend class registry;
-    explicit entity(size_t number)
-        : _number(number)
-    {
-    }
+namespace ecs {
+    class entity {
+        friend class registry;
+        explicit entity(size_t number)
+            : _number(number)
+        {
+        }
 
-public:
-    operator size_t() const
-    {
-        return _number;
-    }
+    public:
+        operator size_t() const
+        {
+            return _number;
+        }
 
-private:
-    size_t _number;
-};
+    private:
+        size_t _number;
+    };
+}
 
 #endif /* !ENTITY_HPP_ */
