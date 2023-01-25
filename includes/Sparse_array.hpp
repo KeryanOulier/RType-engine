@@ -13,6 +13,11 @@
 #include <vector>
 
 namespace ecs {
+    /**
+     * @brief Sparse array class, used to store an array of optional components
+     * 
+     * @tparam Component 
+     */
     template <typename Component> class sparse_array {
     public:
         using value_type = std::optional<Component>;
