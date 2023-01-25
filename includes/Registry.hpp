@@ -75,6 +75,6 @@ private:
 
     int _higgest_entity_id = 0;
     std::vector<size_t> _available_ids;
-    std::vector<std::function<void(registry &, entity)>>
+    std::vector<std::function<void(registry &, entity const &)>>
         _remove_component_functions;
 };
