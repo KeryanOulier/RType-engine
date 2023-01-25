@@ -65,12 +65,16 @@ public:
     {
         get_components<Component>().erase(from);
     }
+    int get_max_entity_count() const
+    {
+        return _higgest_entity_id;
+    }
 
 private:
     std::unordered_map<std::type_index, std::any> _components_array;
 
     int _higgest_entity_id = 0;
     std::vector<size_t> _available_ids;
-    std::vector<std::function<void(registry &, entity)>>
+    std::vector<std::function<void(registry &, entity const &)>>
         _remove_component_functions;
 };
