@@ -10,7 +10,7 @@ class zipper_iterator {
     template <class Container>
     using it_reference_t = typename iterator_t<Container>::reference;
 public:
-    using value_type = std::tuple<decltype(std::declval<it_reference_t<Containers>>().value()) &...>;
+    using value_type = std::tuple<std::size_t, decltype(std::declval<it_reference_t<Containers>>().value()) &...>;
     using reference = value_type;
     using pointer = void;
     using difference_type = size_t;
@@ -65,7 +65,7 @@ private:
     }
     template<size_t... Is>
     value_type to_value(std::index_sequence<Is...> seq) {
-        return std::tie((std::get<Is>(_current))->value()...);
+        return std::tie(_idx, (std::get<Is>(_current))->value()...);
     };
 private:
     iterator_tuple _current;
