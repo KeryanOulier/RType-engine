@@ -4,6 +4,11 @@
 namespace ecs {
     template<class ...Containers> class zipper;
 
+    /**
+     * @brief Iterator class for the zipper class
+     * 
+     * @tparam Containers 
+     */
     template<class ...Containers>
     class zipper_iterator {
         template <class Container>
@@ -18,30 +23,72 @@ namespace ecs {
         using iterator_category = std::forward_iterator_tag;
         using iterator_tuple = std::tuple<iterator_t<Containers>...>;
 
-        friend zipper<Containers...>;
+        friend class zipper<Containers...>;
+    private:
+        /**
+         * @brief Construct a new zipper iterator object
+         * 
+         * @param it_tuple tuple of iterators of the containers
+         * @param max index of the last element
+         */
         zipper_iterator(iterator_tuple const &it_tuple, size_t max) : _current(it_tuple), _idx(0), _max(max) {
             if(_max && !all_set(_seq)) {
                 incr_all(_seq);
             }
         }
     public:
+        /**
+         * @brief Copy construct a new zipper iterator object
+         * 
+         * @param z object to copy
+         */
         zipper_iterator(zipper_iterator const &z) = default;
+        /**
+         * @brief Overload of the ++ operator. Increment the iterator, then return it
+         * 
+         * @return zipper_iterator& 
+         */
         zipper_iterator &operator++() {
             incr_all(_seq);
             return *this;
         }
+        /**
+         * @brief Overload of the ++ operator. Return the iterator, then increment it
+         * 
+         * @return zipper_iterator 
+         */
         zipper_iterator operator++(int) {
             zipper_iterator tmp(*this);
             operator++();
             return tmp;
         }
+        /**
+         * @brief dereference the iterator
+         * 
+         * @return value_type 
+         */
         value_type operator*() {
             return to_value(_seq);
         }
-        // value_type operator->(); // TODO
+        /**
+         * @brief Overload of the == operator. Compare two iterators
+         * 
+         * @param lhs first iterator
+         * @param rhs second iterator
+         * @return true if the iterators are equal
+         * @return false otherwise
+         */
         friend bool operator==(zipper_iterator const &lhs, zipper_iterator const &rhs) {
             return lhs._current == rhs._current;
         }
+        /**
+         * @brief Overload of the != operator. Compare two iterators
+         * 
+         * @param lhs first iterator
+         * @param rhs second iterator
+         * @return true if the iterators are not equal
+         * @return false otherwise
+         */
         friend bool operator!=(zipper_iterator const &lhs, zipper_iterator const &rhs) {
             return !(lhs == rhs);
         }
@@ -59,7 +106,6 @@ namespace ecs {
                 (std::get<Is>(_current)++, ...);
             }
         }
-        public:
         template<size_t... Is>
         bool all_set(std::index_sequence<Is...> seq) {
             return ((std::get<Is>(_current))->has_value() && ...);
@@ -72,7 +118,6 @@ namespace ecs {
         iterator_tuple _current;
         size_t _max;
         size_t _idx;
-    public:
         static constexpr std::index_sequence_for<Containers...> _seq{};
     };
 }
