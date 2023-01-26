@@ -31,7 +31,7 @@ namespace ecs {
          * @param it_tuple tuple of iterators of the containers
          * @param max index of the last element
          */
-        zipper_iterator(iterator_tuple const &it_tuple, size_t max) : _current(it_tuple), _idx(0), _max(max) {
+        zipper_iterator(iterator_tuple const &it_tuple, size_t max) : _current(it_tuple), _max(max), _idx(0) {
             if(_max && !all_set(_seq)) {
                 incr_all(_seq);
             }
@@ -96,6 +96,7 @@ namespace ecs {
     private:
         template<size_t... Is>
         void incr_all(std::index_sequence<Is...> seq) {
+            (void)seq;
             if (_idx >= _max)
                 return;
             _idx++;
@@ -108,10 +109,12 @@ namespace ecs {
         }
         template<size_t... Is>
         bool all_set(std::index_sequence<Is...> seq) {
+            (void)seq;
             return ((std::get<Is>(_current))->has_value() && ...);
         }
         template<size_t... Is>
         value_type to_value(std::index_sequence<Is...> seq) {
+            (void)seq;
             return std::tie(_idx, (std::get<Is>(_current))->value()...);
         };
     private:
