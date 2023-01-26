@@ -10,21 +10,37 @@
 
 #include <string>
 
-class entity {
-    friend class registry;
-    explicit entity(size_t number)
-        : _number(number)
-    {
-    }
+namespace ecs {
+    /**
+     * @brief Entity class that represent an entity thanks to an id
+     * 
+     */
+    class entity {
+        friend class registry;
+        /**
+         * @brief Construct a new entity object with an id
+         * 
+         * @param id
+         */
+        explicit entity(size_t id)
+            : _id(id)
+        {
+        }
 
-public:
-    operator size_t() const
-    {
-        return _number;
-    }
+    public:
+        /**
+         * @brief inplicit conversion operator to size_t
+         * 
+         * @return id of the entity
+         */
+        operator size_t() const
+        {
+            return _id;
+        }
 
-private:
-    size_t _number;
-};
+    private:
+        size_t _id; /**< id of the entity */
+    };
+}
 
 #endif /* !ENTITY_HPP_ */
