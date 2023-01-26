@@ -109,7 +109,7 @@ void logger_system(ecs::registry &reg, ecs::sparse_array<position> positions, ec
     }
 }
 
-void main() {
+int main(void) {
     // creation of the registry
     ecs::registry reg;
 
