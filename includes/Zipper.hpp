@@ -46,8 +46,8 @@ namespace ecs {
                 return std::make_tuple(containers.begin() + _compute_size(containers...) ...);
             }
         private:
+            size_t _size;
             iterator_tuple _begin;
             iterator_tuple _end;
-            size_t _size;
     };
 }
