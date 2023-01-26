@@ -2,18 +2,38 @@
 #include <algorithm>
 
 namespace ecs {
+    /**
+     * @brief Zipper helper class to iterate over multiple containers at the same time and only stop when an entity have all the components specified
+     * 
+     * @tparam Containers 
+     */
     template <class ...Containers>
     class zipper {
         public:
             using iterator = zipper_iterator<Containers...>;
             using iterator_tuple = typename iterator::iterator_tuple;
 
+            /**
+             * @brief Construct a new zipper object
+             * 
+             * @param cs all the containers to iterate over
+             */
             zipper(Containers &...cs) : _size(_compute_size(cs...)), _begin(std::make_tuple(cs.begin()...)), _end(_compute_end(cs...)) {
             };
 
+            /**
+             * @brief Get the begin iterator
+             * 
+             * @return iterator 
+             */
             iterator begin() {
                 return iterator(_begin, _size);
             }
+            /**
+             * @brief Get the end iterator
+             * 
+             * @return iterator 
+             */
             iterator end() {
                 return iterator(_end, 0);
             }
