@@ -68,23 +68,27 @@ namespace ecs {
 
         // vector functions overload
         /**
-         * @brief Overload of operator[] to access the sparse_array at a given index
+         * @brief Overload of operator[] to access the sparse_array at a given index. Can throw a std::out_of_range exception.
          * 
          * @param idx to access
          * @return reference_type 
          */
         reference_type operator[](size_t idx)
         {
+            if (idx >= _data.size())
+                throw std::out_of_range("Index out of range");
             return _data[idx];
         }
         /**
-         * @brief Overload of operator[] to access the sparse_array at a given index (const)
+         * @brief Overload of operator[] to access the sparse_array at a given index. Can throw a std::out_of_range exception. (const)
          * 
          * @param idx to access
          * @return const_reference_type 
          */
         const_reference_type operator[](size_t idx) const
         {
+            if (idx >= _data.size())
+                throw std::out_of_range("Index out of range");
             return _data[idx];
         };
         /**
