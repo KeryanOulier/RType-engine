@@ -126,6 +126,22 @@ namespace ecs {
             return _higgest_entity_id;
         }
 
+        /**
+         * @brief Check if an entity has a component
+         *
+         * @tparam Component to check
+         * @param e entity to check
+         * @return true or false
+         */
+        template <typename Component> bool has_component(entity const &e) const
+        {
+            try {
+                get_components<Component>()[e].has_value();
+            } catch (std::exception) {
+                return false;
+            }
+        }
+
     private:
         std::unordered_map<std::type_index, std::any> _components_array;
 
