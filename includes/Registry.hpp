@@ -142,6 +142,13 @@ namespace ecs {
             }
         }
 
+        /**
+         * @brief add a system to the registry
+         * 
+         * @tparam Components 
+         * @tparam Function 
+         * @param f 
+         */
         template <class... Components, typename Function>
         void add_system(Function &&f) {
             _systems.push_back(
@@ -149,6 +156,10 @@ namespace ecs {
             );
         }
 
+        /**
+         * @brief run all the systems
+         * 
+         */
         void run_systems() {
             for (auto &f : _systems) {
                 f(*this);
