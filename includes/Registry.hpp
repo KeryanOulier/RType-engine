@@ -118,7 +118,7 @@ namespace ecs {
         }
         /**
          * @brief Get the max entity count of the registry
-         * 
+         *
          * @return int max entity count
          */
         int get_max_entity_count() const
@@ -142,6 +142,19 @@ namespace ecs {
             }
         }
 
+        template <class... Components, typename Function>
+        void add_system(Function &&f) {
+            _systems.push_back(
+                [&f](registry &reg) { f(reg, reg.get_components<Components>()...); }
+            );
+        }
+
+        void run_systems() {
+            for (auto &f : _systems) {
+                f(*this);
+            }
+        }
+
     private:
         std::unordered_map<std::type_index, std::any> _components_array;
 
@@ -149,5 +162,6 @@ namespace ecs {
         std::vector<size_t> _available_ids;
         std::vector<std::function<void(registry &, entity const &)>>
             _remove_component_functions;
+        std::vector<std::function<void(registry &)>> _systems;
     };
 }
