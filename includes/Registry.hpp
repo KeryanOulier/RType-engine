@@ -167,7 +167,8 @@ namespace ecs {
         void run_systems() {
             for (auto &f : _systems) {
                 f(*this);
-        
+            }
+        }
         // MODULE/lib
         using entrypoint_fcn = void (*)(ecs::registry &);
 
