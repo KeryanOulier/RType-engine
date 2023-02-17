@@ -2,9 +2,14 @@
 #include <functional>
 #include <typeindex>
 #include <unordered_map>
-#include <dlfcn.h>
 #include <filesystem>
 #include <iostream>
+
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <dlfcn.h>
+#endif
 
 #include "Entity.hpp"
 #include "Sparse_array.hpp"
@@ -214,10 +219,25 @@ namespace ecs {
                 return nullptr;
             }
 
+#ifdef _WIN32
+            auto handle = LoadLibrary(lib_path.c_str());
+#else
             auto handle = dlopen(lib_path.c_str(), RTLD_LAZY);
+#endif
 
             if (!handle) {
-                std::cerr << "Cannot open library: " << dlerror() << std::endl;
+                std::string error_message;
+#ifdef _WIN32
+                DWORD error = GetLastError();
+                LPSTR messageBuffer = nullptr;
+                FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                    NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+                error_message = messageBuffer;
+                LocalFree(messageBuffer);
+#else
+                error_message = dlerror();
+#endif
+                std::cerr << "Cannot open library: " << error_message << std::endl;
                 return nullptr;
             }
             return handle;
@@ -225,18 +245,38 @@ namespace ecs {
 
         void close_lib(void *handle)
         {
-            if (handle)
+            if (handle) {
+#ifdef _WIN32
+                FreeLibrary((HMODULE)handle);
+#else
                 dlclose(handle);
+#endif
+            }
         }
 
         template <typename T>
         T get_function(const std::string &function_name, void *handle)
         {
-            T function = (T) dlsym(handle, function_name.c_str());
-            const char *dlsym_error = dlerror();
+            T function = nullptr;
+#ifdef _WIN32
+            function = (T)GetProcAddress((HMODULE)handle, function_name.c_str());
+#else
+            function = (T)dlsym(handle, function_name.c_str());
+#endif
 
-            if (dlsym_error) {
-                std::cerr << "Cannot load symbol '" << function_name << "': " << dlsym_error << std::endl;
+            if (!function) {
+                std::string error_message;
+#ifdef _WIN32
+                DWORD error = GetLastError();
+                LPSTR messageBuffer = nullptr;
+                FormatMessageA(FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+                    NULL, error, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), (LPSTR)&messageBuffer, 0, NULL);
+                error_message = messageBuffer;
+                LocalFree(messageBuffer);
+#else
+                error_message = dlerror();
+#endif
+                std::cerr << "Cannot load symbol '" << function_name << "': " << error_message << std::endl;
                 throw std::runtime_error("Cannot load symbol");
             }
             return function;
@@ -244,7 +284,6 @@ namespace ecs {
 
     private:
         std::unordered_map<std::type_index, std::any> _components_array;
-
         int _higgest_entity_id = 0;
         std::vector<size_t> _available_ids;
         std::vector<std::function<void(registry &, entity const &)>>
