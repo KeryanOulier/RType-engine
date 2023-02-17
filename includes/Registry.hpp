@@ -12,14 +12,14 @@
 namespace ecs {
     /**
      * @brief Registry class that manages entities and components
-     * 
+     *
      */
     class registry {
     public:
         // component managing
         /**
          * @brief Register a component type to the registry
-         * 
+         *
          * @tparam Component to register
          * @return sparse_array of the registered component
          */
@@ -34,7 +34,7 @@ namespace ecs {
         }
         /**
          * @brief Get the sparse_array of a component
-         * 
+         *
          * @tparam Component to get
          * @return sparse_array of the component
          */
@@ -45,7 +45,7 @@ namespace ecs {
         }
         /**
          * @brief Get the sparse_array of a component (const)
-         * 
+         *
          * @tparam Component to get
          * @return sparse_array of the component
          */
@@ -59,7 +59,7 @@ namespace ecs {
         // entity managing
         /**
          * @brief Create an entity
-         * 
+         *
          * @return entity created
          */
         entity spawn_entity()
@@ -74,9 +74,9 @@ namespace ecs {
         }
         /**
          * @brief Get an entity from an index
-         * 
+         *
          * @param index of the entity
-         * @return entity 
+         * @return entity
          */
         entity entity_from_index(size_t index) const
         {
@@ -84,7 +84,7 @@ namespace ecs {
         }
         /**
          * @brief Kill an entity
-         * 
+         *
          * @param e entity to kill
          */
         void kill_entity(entity e)
@@ -96,7 +96,7 @@ namespace ecs {
         }
         /**
          * @brief add a component to an entity
-         * 
+         *
          * @tparam Component type to add
          * @param to entity to receive the component
          * @param component to add to the entity
@@ -111,7 +111,7 @@ namespace ecs {
         }
         /**
          * @brief remove a component from an entity
-         * 
+         *
          * @tparam Component type to remove
          * @param from entity to remove the component from
          */
@@ -144,25 +144,40 @@ namespace ecs {
                 return false;
             }
         }
-        
-        // SYSTEMS
+
+    // SYSTEMS
+    private:
+        class system {
+            public:
+                // system(std::function<void(registry &)> &&f) : _f(f), _priority(0) {}
+                system(std::function<void(registry &)> &&f, int priority = 0) : _f(f), _priority(priority) {}
+                int get_priority() const { return _priority; }
+                void operator()(registry &reg) { _f(reg); }
+            private:
+                std::function<void(registry &)> _f;
+                int _priority;
+        };
+    public:
         /**
          * @brief add a system to the registry
-         * 
-         * @tparam Components 
-         * @tparam Function 
-         * @param f 
+         *
+         * @tparam Components
+         * @tparam Function
+         * @param f
          */
         template <class... Components, typename Function>
-        void add_system(Function &&f) {
-            _systems.push_back(
-                [&f](registry &reg) { f(reg, reg.get_components<Components>()...); }
+        void add_system(Function &&f, int priority=0) {
+            _systems.emplace_back(
+                [&f](registry &reg) { f(reg, reg.get_components<Components>()...); }, priority
             );
+            std::sort(_systems.begin(), _systems.end(), [](const system &a, const system &b) {
+                return a.get_priority() < b.get_priority();
+            });
         }
 
         /**
          * @brief run all the systems
-         * 
+         *
          */
         void run_systems() {
             for (auto &f : _systems) {
@@ -234,6 +249,6 @@ namespace ecs {
         std::vector<size_t> _available_ids;
         std::vector<std::function<void(registry &, entity const &)>>
             _remove_component_functions;
-        std::vector<std::function<void(registry &)>> _systems;
+        std::vector<system> _systems;
     };
 }
