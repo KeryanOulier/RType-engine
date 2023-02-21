@@ -14,7 +14,7 @@
 
 #include "Entity.hpp"
 #include "Sparse_array.hpp"
-#include "Components.hpp"
+// #include "Components.hpp"
 
 namespace ecs {
     /**
