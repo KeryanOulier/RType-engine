@@ -13,6 +13,7 @@
 
 #include "Entity.hpp"
 #include "Sparse_array.hpp"
+#include "Components.hpp"
 
 namespace ecs {
     /**
@@ -37,6 +38,40 @@ namespace ecs {
             });
             return get_components<Component>();
         }
+
+        std::unordered_map<std::type_index, std::any> _components_from_type;
+        template <class Component, typename... ObjectType>
+        sparse_array<Component> &my_register_component(const std::string &component_name, std::function<Component(ObjectType)>... f)
+        {
+            _components_array[std::type_index(typeid(Component))] =
+                sparse_array<Component>();
+            _remove_component_functions.push_back([](registry &reg, entity e) {
+                reg.get_components<Component>().erase(e);
+            });
+            (put_in_map<Component, ObjectType>(component_name, f), ...);
+
+            return get_components<Component>();
+        }
+
+        template <class Component, typename ObjectType>
+        void put_in_map(const std::string &component_name, std::function<Component(ObjectType)> f)
+        {
+            if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
+                std::cout << "not found" << std::endl;
+                _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType)>>();
+            }
+            if (std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))]).find(component_name) == std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))]).end()) {
+                std::cout << "not found" << std::endl;
+                std::cout << "adding" << std::endl;
+                std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))])[component_name] = [&](entity e, ObjectType v) {
+                    add_component<Component>(e, f(v));
+                };
+            }
+            if (!std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))])[component_name]) {
+                std::cout << "didn't add" << std::endl;
+            }
+        }
+
         /**
          * @brief Get the sparse_array of a component
          *
@@ -114,6 +149,18 @@ namespace ecs {
             return get_components<Component>().insert_at(to,
                 std::forward<Component>(component));
         }
+
+        template <typename ObjectType>
+        void add_component(const std::string &component_name, const entity &to, ObjectType &&object)
+        {
+            std::cout << "add_component: " << component_name << std::endl;
+            if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end())
+                throw std::runtime_error("No component registered for this type 1");
+            if (std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))]).find(component_name) == std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))]).end())
+                throw std::runtime_error("No component registered for this type 2");
+            std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))])[component_name](to, object);
+        }
+
         /**
          * @brief remove a component from an entity
          *
@@ -154,12 +201,11 @@ namespace ecs {
     private:
         class system {
             public:
-                // system(std::function<void(registry &)> &&f) : _f(f), _priority(0) {}
-                system(std::function<void(registry &)> &&f, int priority = 0) : _f(f), _priority(priority) {}
+                system(std::function<void(registry &, std::vector<entity> &)> &&f, int priority = 0) : _f(f), _priority(priority) {}
                 int get_priority() const { return _priority; }
-                void operator()(registry &reg) { _f(reg); }
+                void operator()(registry &reg, std::vector<entity> &entities) { _f(reg, entities); }
             private:
-                std::function<void(registry &)> _f;
+                std::function<void(registry &, std::vector<entity> &)> _f;
                 int _priority;
         };
     public:
@@ -168,12 +214,16 @@ namespace ecs {
          *
          * @tparam Components
          * @tparam Function
-         * @param f
+         * @param f the function to execute
+         * @param priority the priority in which the system will be executed
          */
         template <class... Components, typename Function>
         void add_system(Function &&f, int priority=0) {
             _systems.emplace_back(
-                [&f](registry &reg) { f(reg, reg.get_components<Components>()...); }, priority
+                [&f](registry &reg, std::vector<entity> &entities) {
+                    f(reg, entities, reg.get_components<Components>()...);
+                },
+                priority
             );
             std::sort(_systems.begin(), _systems.end(), [](const system &a, const system &b) {
                 return a.get_priority() < b.get_priority();
@@ -182,11 +232,12 @@ namespace ecs {
 
         /**
          * @brief run all the systems
-         *
+         * @param e a vector of entities to pass to the systems, it is useful for systems that need to access other entities, to manage a scene for example
          */
-        void run_systems() {
+        void run_systems(std::vector<entity> &e)
+        {
             for (auto &f : _systems) {
-                f(*this);
+                f(*this, e);
             }
         }
         // MODULE/lib
@@ -284,6 +335,7 @@ namespace ecs {
 
     private:
         std::unordered_map<std::type_index, std::any> _components_array;
+        std::unordered_map<std::string, std::function<void(entity const &, std::any)>> _components_adder;
         int _higgest_entity_id = 0;
         std::vector<size_t> _available_ids;
         std::vector<std::function<void(registry &, entity const &)>>
