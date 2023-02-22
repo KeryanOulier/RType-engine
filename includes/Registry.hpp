@@ -61,7 +61,7 @@ namespace ecs {
         void put_in_map(const std::string &component_name, std::function<Component(ObjectType)> &f)
         {
             if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
-                _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType)>>();
+                _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType &)>>();
             }
             serializerMap<ObjectType> &map = std::any_cast<serializerMap<ObjectType> &>(_components_from_type[std::type_index(typeid(ObjectType))]);
             if (map.find(component_name) == map.end()) {
