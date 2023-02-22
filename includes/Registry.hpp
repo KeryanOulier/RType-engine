@@ -43,7 +43,6 @@ namespace ecs {
             return get_components<Component>();
         }
 
-        std::unordered_map<std::type_index, std::any> _components_from_type;
         template <class Component, typename... ObjectType>
         sparse_array<Component> &my_register_component(const std::string &component_name, serializerFunction<Component, ObjectType>... f)
         {
@@ -333,6 +332,15 @@ namespace ecs {
             return function;
         }
 
+        void set_state(const std::string &state)
+        {
+            _state = state;
+        }
+        const std::string &get_state() const
+        {
+            return _state;
+        }
+
     private:
         std::unordered_map<std::type_index, std::any> _components_array;
         std::unordered_map<std::string, std::function<void(entity const &, std::any)>> _components_adder;
@@ -341,5 +349,7 @@ namespace ecs {
         std::vector<std::function<void(registry &, entity const &)>>
             _remove_component_functions;
         std::vector<system> _systems;
+        std::unordered_map<std::type_index, std::any> _components_from_type;
+        std::string _state;
     };
 }
