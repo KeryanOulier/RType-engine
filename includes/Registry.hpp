@@ -45,7 +45,7 @@ namespace ecs {
 
         std::unordered_map<std::type_index, std::any> _components_from_type;
         template <class Component, typename... ObjectType>
-        sparse_array<Component> &my_register_component(const std::string &component_name, serializerFunction<Component, ObjectType>... f)
+        sparse_array<Component> &register_component(const std::string &component_name, serializerFunction<Component, ObjectType>... f)
         {
             _components_array[std::type_index(typeid(Component))] =
                 sparse_array<Component>();
