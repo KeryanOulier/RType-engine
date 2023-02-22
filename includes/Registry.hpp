@@ -331,7 +331,7 @@ namespace ecs {
             }
             return function;
         }
-
+    public:
         void set_state(const std::string &state)
         {
             _state = state;
