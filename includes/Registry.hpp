@@ -154,10 +154,10 @@ namespace ecs {
         {
             using unreferencedObjectType = std::remove_reference_t<ObjectType>;
             if (_components_from_type.find(std::type_index(typeid(unreferencedObjectType))) == _components_from_type.end())
-                throw std::runtime_error("No component registered for this type 1");
+                throw std::runtime_error("No component registered for this type : " + std::string(typeid(unreferencedObjectType).name()));
             serializerMap<unreferencedObjectType> &map = std::any_cast<serializerMap<unreferencedObjectType> &>(_components_from_type[std::type_index(typeid(unreferencedObjectType))]);
             if (map.find(component_name) == map.end())
-                throw std::runtime_error("No component registered for this type 2");
+                throw std::runtime_error("No component registered for this type : " + component_name);
             map[component_name](to, object);
         }
 
