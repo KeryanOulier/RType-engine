@@ -22,6 +22,9 @@ namespace ecs {
      *
      */
     class registry {
+        template<class Component, class ObjectType> using serializerFunction = std::function<Component(ObjectType)>;
+        template<class ObjectType> using componentCreator = std::function<void(entity, ObjectType &)>;
+        template<class ObjectType> using serializerMap = std::unordered_map<std::string, componentCreator<ObjectType>>;
     public:
         // component managing
         /**
@@ -42,7 +45,7 @@ namespace ecs {
 
         std::unordered_map<std::type_index, std::any> _components_from_type;
         template <class Component, typename... ObjectType>
-        sparse_array<Component> &my_register_component(const std::string &component_name, std::function<Component(ObjectType)>... f)
+        sparse_array<Component> &my_register_component(const std::string &component_name, serializerFunction<Component, ObjectType>... f)
         {
             _components_array[std::type_index(typeid(Component))] =
                 sparse_array<Component>();
@@ -57,15 +60,12 @@ namespace ecs {
         template <class Component, typename ObjectType>
         void put_in_map(const std::string &component_name, std::function<Component(ObjectType)> &f)
         {
-            using serializerMap = std::unordered_map<std::string, std::function<void(entity, ObjectType)>> &;
             if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
                 _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType)>>();
             }
-            serializerMap &map = std::any_cast<serializerMap &>(_components_from_type[std::type_index(typeid(ObjectType))]);
+            serializerMap<ObjectType> &map = std::any_cast<serializerMap<ObjectType> &>(_components_from_type[std::type_index(typeid(ObjectType))]);
             if (map.find(component_name) == map.end()) {
                 map.insert({component_name, [&](entity e, ObjectType v) {
-                    std::cout << "adding component" << std::endl;
-                    // f(v);
                     add_component<Component>(e, f(v));
                 }});
             }
@@ -150,25 +150,15 @@ namespace ecs {
         }
 
         template <typename ObjectType>
-        void add_component(const std::string &component_name, const entity &to, ObjectType &&object)
+        void add_component(const std::string &component_name, const entity &to, ObjectType &object)
         {
-            using serializerMap = std::unordered_map<std::string, std::function<void(entity, ObjectType)>> &;
-            if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end())
+            using unreferencedObjectType = std::remove_reference_t<ObjectType>;
+            if (_components_from_type.find(std::type_index(typeid(unreferencedObjectType))) == _components_from_type.end())
                 throw std::runtime_error("No component registered for this type 1");
-            serializerMap &map = std::any_cast<serializerMap &>(_components_from_type[std::type_index(typeid(ObjectType))]);
+            serializerMap<unreferencedObjectType> &map = std::any_cast<serializerMap<unreferencedObjectType> &>(_components_from_type[std::type_index(typeid(unreferencedObjectType))]);
             if (map.find(component_name) == map.end())
                 throw std::runtime_error("No component registered for this type 2");
-            map[component_name](to, std::forward<ObjectType>(object));
-            // std::cout << "add_component: " << component_name << std::endl;
-            // if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end())
-            //     throw std::runtime_error("No component registered for this type 1");
-            // if (std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))]).find(component_name) == std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))]).end())
-            //     throw std::runtime_error("No component registered for this type 2");
-            // using serializerMap = std::unordered_map<std::string, std::function<void(entity, ObjectType)>> &;
-            // serializerMap &map = std::any_cast<serializerMap &>(_components_from_type[std::type_index(typeid(ObjectType))]);
-            // if (map.find(component_name) == map.end())
-            //     throw std::runtime_error("No component registered for this type 3");
-            // std::any_cast<std::unordered_map<std::string, std::function<void(entity, ObjectType)>>>(_components_from_type[std::type_index(typeid(ObjectType))])[component_name](to, object);
+            map[component_name](to, object);
         }
 
         /**
