@@ -351,6 +351,21 @@ namespace ecs {
             return _state;
         }
 
+        template<typename... Args, typename Function>
+        void add_event(const std::string &event_name, Function &&f)
+        {
+            _events[event_name].emplace_back(std::function<void(Args &...)>(f));
+        }
+
+        template<typename... Args>
+        void trigger_event(const std::string &event_name, Args &... args)
+        {
+            for (auto &f : _events[event_name]) {
+                // std::invoke(std::any_cast<std::function<void(Args...)>>(f), args...);
+                std::any_cast<std::function<void(Args &...)>>(f)(args...);
+            }
+        }
+
     private:
         std::unordered_map<std::type_index, std::any> _components_array;
         std::unordered_map<std::string, std::function<void(entity const &, std::any)>> _components_adder;
@@ -362,5 +377,6 @@ namespace ecs {
         std::unordered_map<std::type_index, std::any> _components_from_type;
         std::string _state;
         std::vector<std::string> _loaded_libs;
+        std::unordered_map<std::string, std::vector<std::any>> _events;
     };
 }
