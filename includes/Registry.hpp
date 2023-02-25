@@ -262,6 +262,16 @@ namespace ecs {
                 close_lib(handle);
             }
         }
+        bool add_lib(const std::string &lib_name)
+        {
+            if (is_lib_loaded(lib_name)) return false;
+            _loaded_libs.push_back(lib_name);
+            return true;
+        }
+        bool is_lib_loaded(const std::string &lib_name)
+        {
+            return std::find(_loaded_libs.begin(), _loaded_libs.end(), lib_name) != _loaded_libs.end();
+        }
     private:
         void *load_lib(const std::string &lib_path) {
             if (!std::filesystem::exists(lib_path)) {
@@ -351,5 +361,6 @@ namespace ecs {
         std::vector<system> _systems;
         std::unordered_map<std::type_index, std::any> _components_from_type;
         std::string _state;
+        std::vector<std::string> _loaded_libs;
     };
 }
