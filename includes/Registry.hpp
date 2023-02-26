@@ -45,8 +45,8 @@ namespace ecs {
             return get_components<Component>();
         }
 
-        template <class Component, typename ObjectType>
-        sparse_array<Component> &register_component(const std::string &component_name, serializerFunction<Component, ObjectType> &&f)
+        template <class Component, typename ObjectType, typename Function>
+        sparse_array<Component> &register_component(const std::string &component_name, Function &&f)
         {
             _components_array[std::type_index(typeid(Component))] =
                 sparse_array<Component>();
