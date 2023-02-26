@@ -53,13 +53,13 @@ namespace ecs {
             _remove_component_functions.push_back([](registry &reg, entity e) {
                 reg.get_components<Component>().erase(e);
             });
-            (put_in_map<Component, ObjectType>(component_name, f), ...);
+            (put_in_map<Component, ObjectType>(component_name, std::move(f)), ...);
 
             return get_components<Component>();
         }
 
         template <class Component, typename ObjectType>
-        void put_in_map(const std::string &component_name, serializerFunction<Component, ObjectType> &f)
+        void put_in_map(const std::string &component_name, serializerFunction<Component, ObjectType> &&f)
         {
             if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
                 _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType &)>>();
