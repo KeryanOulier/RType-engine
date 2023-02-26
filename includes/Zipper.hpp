@@ -1,3 +1,13 @@
+/*
+** EPITECH PROJECT, 2023
+** engine
+** File description:
+** Zipper
+*/
+
+#ifndef ZIPPER_HPP_
+#define ZIPPER_HPP_
+
 #include "Zipper_iterator.hpp"
 #include <algorithm>
 
@@ -51,3 +61,4 @@ namespace ecs {
             iterator_tuple _end;
     };
 }
+#endif /* !ZIPPER_HPP_ */

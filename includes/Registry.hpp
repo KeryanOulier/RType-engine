@@ -1,3 +1,6 @@
+#ifndef REGISTRY_HPP_
+#define REGISTRY_HPP_
+
 #include <any>
 #include <functional>
 #include <typeindex>
@@ -14,7 +17,6 @@
 
 #include "Entity.hpp"
 #include "Sparse_array.hpp"
-// #include "Components.hpp"
 
 namespace ecs {
     /**
@@ -380,3 +382,5 @@ namespace ecs {
         std::unordered_map<std::string, std::vector<std::any>> _events;
     };
 }
+
+#endif /* !REGISTRY_HPP_ */
