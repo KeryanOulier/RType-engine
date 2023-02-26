@@ -354,7 +354,7 @@ namespace ecs {
         template<typename... Args, typename Function>
         void add_event(const std::string &event_name, Function &&f)
         {
-            _events[event_name].emplace_back(std::function<void(Args &...)>(f));
+            _events[event_name].emplace_back(std::function<void(registry &,Args &...)>(f));
         }
 
         template<typename... Args>
@@ -362,7 +362,7 @@ namespace ecs {
         {
             for (auto &f : _events[event_name]) {
                 // std::invoke(std::any_cast<std::function<void(Args...)>>(f), args...);
-                std::any_cast<std::function<void(Args &...)>>(f)(args...);
+                std::any_cast<std::function<void(registry &,Args &...)>>(f)(*this, args...);
             }
         }
 
