@@ -45,15 +45,21 @@ namespace ecs {
             return get_components<Component>();
         }
 
-        template <class Component, typename ObjectType, typename Function>
-        sparse_array<Component> &register_component(const std::string &component_name, Function &&f)
+        template <class Component, typename... ObjectType, typename... Function>
+        sparse_array<Component> &register_component(const std::string &component_name, Function &&...f)
         {
             _components_array[std::type_index(typeid(Component))] =
                 sparse_array<Component>();
             _remove_component_functions.push_back([](registry &reg, entity e) {
                 reg.get_components<Component>().erase(e);
             });
-            // (put_in_map<Component, ObjectType>(component_name, std::move(f)), ...);
+            (put_in_map<Component, ObjectType>(component_name, f), ...);
+            return get_components<Component>();
+        }
+
+        template <class Component, typename ObjectType, typename Function>
+        void put_in_map(const std::string &component_name, Function &&f)
+        {
             if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
                 _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType &)>>();
             }
@@ -63,23 +69,7 @@ namespace ecs {
                     add_component<Component>(e, f(v));
                 }});
             }
-
-            return get_components<Component>();
         }
-
-        // template <class Component, typename ObjectType>
-        // void put_in_map(const std::string &component_name, serializerFunction<Component, ObjectType> &&f)
-        // {
-        //     if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
-        //         _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType &)>>();
-        //     }
-        //     serializerMap<ObjectType> &map = std::any_cast<serializerMap<ObjectType> &>(_components_from_type[std::type_index(typeid(ObjectType))]);
-        //     if (map.find(component_name) == map.end()) {
-        //         map.insert({component_name, [&](entity e, ObjectType v) {
-        //             add_component<Component>(e, f(v));
-        //         }});
-        //     }
-        // }
 
         /**
          * @brief Get the sparse_array of a component
