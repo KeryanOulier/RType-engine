@@ -24,7 +24,7 @@ namespace ecs {
      *
      */
     class registry {
-        template<class Component, class ObjectType> using serializerFunction = std::function<Component(ObjectType)>;
+        template<class Component, class ObjectType> using serializerFunction = std::function<Component(ObjectType &)>;
         template<class ObjectType> using componentCreator = std::function<void(entity, ObjectType &)>;
         template<class ObjectType> using serializerMap = std::unordered_map<std::string, componentCreator<ObjectType>>;
     public:
