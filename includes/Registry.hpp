@@ -59,7 +59,7 @@ namespace ecs {
         }
 
         template <class Component, typename ObjectType>
-        void put_in_map(const std::string &component_name, std::function<Component(ObjectType)> &f)
+        void put_in_map(const std::string &component_name, serializerFunction<Component, ObjectType> &f)
         {
             if (_components_from_type.find(std::type_index(typeid(ObjectType))) == _components_from_type.end()) {
                 _components_from_type[std::type_index(typeid(ObjectType))] = std::unordered_map<std::string, std::function<void(entity, ObjectType &)>>();
