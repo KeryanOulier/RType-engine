@@ -263,6 +263,38 @@ namespace ecs {
                 close_lib(handle);
             }
         }
+        
+        /**
+            @brief: Load all the libraries in a folder and execute the entrypoint function
+            @param folder_path: The path of the folder to load all the libraries in it
+        */
+       void all_libs_entrypoint(const std::string &folder_path)
+       {
+            if (!std::filesystem::exists(folder_path)) {
+                std::cerr << "Error while executing all_libs_entrypoint: " << folder_path << " does not exist" << std::endl;
+                return;
+            }
+
+            if (!std::filesystem::is_directory(folder_path)) {
+                std::cerr << "Error while executing all_libs_entrypoint: " << folder_path << " is not a directory" << std::endl;
+                return;
+            }
+
+            for (const auto &entry : std::filesystem::directory_iterator(folder_path)) {
+                if (entry.is_directory()) {
+                        all_libs_entrypoint(entry.path().string());
+                } else {
+#ifdef _WIN32
+                    if (entry.path().extension() == ".dll") {
+#else
+                    if (entry.path().extension() == ".so") {
+#endif
+                        lib_entrypoint(entry.path().string());
+                    }
+                }
+            }
+       }
+
         bool add_lib(const std::string &lib_name)
         {
             if (is_lib_loaded(lib_name)) return false;
