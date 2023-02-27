@@ -282,7 +282,7 @@ namespace ecs {
 
             for (const auto &entry : std::filesystem::directory_iterator(folder_path)) {
                 if (entry.is_directory()) {
-                        all_libs_entrypoint(entry.path().string());
+                        // all_libs_entrypoint(entry.path().string());
                 } else {
 #ifdef _WIN32
                     if (entry.path().extension() == ".dll") {
