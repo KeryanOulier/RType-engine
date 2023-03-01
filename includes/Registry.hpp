@@ -388,14 +388,14 @@ namespace ecs {
         template<typename... Args, typename Function>
         void add_event(const std::string &event_name, Function &&f)
         {
-            _events[event_name].emplace_back(std::function<void(registry &, std::vector<entity> &enitiesn, Args &...)>(f));
+            _events[event_name].emplace_back(std::function<void(registry &, std::vector<entity> &enitiesn, Args...)>(f));
         }
 
         template<typename... Args>
-        void trigger_event(const std::string &event_name, std::vector<entity> &entities, Args &... args)
+        void trigger_event(const std::string &event_name, std::vector<entity> &entities, Args... args)
         {
             for (auto &f : _events[event_name]) {
-                std::any_cast<std::function<void(registry &, std::vector<entity> &, Args &...)>>(f)(*this, entities, args...);
+                std::any_cast<std::function<void(registry &, std::vector<entity> &, Args...)>>(f)(*this, entities, args...);
             }
         }
 
