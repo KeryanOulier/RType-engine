@@ -192,6 +192,7 @@ namespace ecs {
         {
             try {
                 get_components<Component>()[e].has_value();
+                return true;
             } catch (std::exception) {
                 return false;
             }
