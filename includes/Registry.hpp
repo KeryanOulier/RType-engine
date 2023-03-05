@@ -315,7 +315,7 @@ namespace ecs {
 
 #ifdef _WIN32
             auto fpath = std::filesystem::absolute(lib_path);
-            auto handle = LoadLibrary(fpath.c_str());
+            auto handle = LoadLibraryW(fpath.c_str());
 #else
             auto handle = dlopen(lib_path.c_str(), RTLD_LAZY);
 #endif
