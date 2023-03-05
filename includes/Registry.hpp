@@ -191,8 +191,8 @@ namespace ecs {
         template <typename Component> bool has_component(entity const &e) const
         {
             try {
-                get_components<Component>()[e].has_value();
-                return true;
+                if (get_components<Component>().size() <= e) return false;
+                return get_components<Component>()[e].has_value();
             } catch (std::exception) {
                 return false;
             }
